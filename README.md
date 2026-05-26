@@ -55,20 +55,26 @@ cat-vault/
 - MySQL 8.0
 - Redis 6+
 
+### 数据库初始化
+
+```bash
+mysql -u root -p < cat-vault-backend/sql/create_table.sql
+
+# 如果使用旧库升级，需要执行 VIP 字段迁移
+mysql -u root -p cat_vault < cat-vault-backend/sql/migrate_user_vip.sql
+```
+
 ### 后端启动
 
 ```bash
 cd cat-vault-backend
 
-# 1. 初始化数据库
-mysql -u root -p < sql/create_table.sql
-
-# 2. 配置本地环境（复制并修改数据库/COS/Redis 配置）
-cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
-
-# 3. 启动
+# 默认连接本地 MySQL cat_vault、Redis 127.0.0.1:6379
+# 数据库默认账号为 root/123456，可通过环境变量 DB_USERNAME、DB_PASSWORD 等覆盖
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
+
+本地开发的 COS 密钥放在 `cat-vault-backend/src/main/resources/application-local.yml`，该文件已被 Git 忽略。Docker 启动时可复制 `cat-vault-backend/.env.example` 为 `.env` 后填写真实配置。
 
 ### 前端启动
 
@@ -78,7 +84,7 @@ npm install
 npm run dev
 ```
 
-默认前端运行在 http://localhost:5173，后端 API 在 http://localhost:8080/api。
+默认前端运行在 http://localhost:3000，后端 API 在 http://localhost:8080/api。
 
 ## 权限模型
 

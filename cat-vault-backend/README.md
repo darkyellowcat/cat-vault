@@ -80,22 +80,31 @@ Cat Vault 是一个可复用的云图库模板框架，开发者可以基于此�
 ```bash
 cd cat-vault-backend
 cp .env.example .env
-# 编辑 .env 填入 COS 配置
+# 编辑 .env 填入数据库密码和 COS 配置
 docker-compose up -d
 ```
 
 ### 方式二：本地开发
 
+以下命令默认从项目根目录执行：
+
 ```bash
 # 1. 初始化数据库
 mysql -u root -p < cat-vault-backend/sql/create_table.sql
 
-# 2. 启动后端
+# 如果使用旧库升级，需要执行 VIP 字段迁移
+mysql -u root -p cat_vault < cat-vault-backend/sql/migrate_user_vip.sql
+
+# 2. 配置本地 COS
+# 在 cat-vault-backend/src/main/resources/application-local.yml 中填写 COS 配置
+# application-local.yml 已被 Git 忽略，不要提交真实密钥
+
+# 3. 启动后端
 cd cat-vault-backend
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
-# 3. 启动前端
-cd cat-vault-frontend
+# 4. 启动前端
+cd ../cat-vault-frontend
 npm install
 npm run dev
 ```
@@ -212,7 +221,7 @@ cat-vault/
 
 | Profile | 用途 | 说明 |
 |---------|------|------|
-| local | 本地开发 | 使用本地 MySQL/Redis，COS 密钥在配置文件中 |
+| local | 本地开发 | 使用本地 MySQL/Redis；COS 密钥放在未提交的 application-local.yml 中 |
 | dev | 开发环境 | 敏感配置通过环境变量注入 |
 | prod | 生产环境 | 关闭 SQL 日志和 API 文档，HikariCP 连接池调优 |
 
